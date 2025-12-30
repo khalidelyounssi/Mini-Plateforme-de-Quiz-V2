@@ -13,7 +13,8 @@ $db = Database::getInstance();
 $conn = $db->getConnection();
 
 $monCatigory = new Category();
-$categorys= $monCatigory->getAll();
+$categorys= $monCatigory->getAllC();
+
 
 
 
@@ -46,7 +47,7 @@ $categorys= $monCatigory->getAll();
             <?php foreach( $categorys as $cat ): ?>
 
 
-            <div onclick="window.location.href='quizzes.php'" class="bg-white rounded-xl shadow-md hover:shadow-2xl transition duration-300 overflow-hidden group cursor-pointer border border-gray-100 transform hover:-translate-y-1">
+            <div onclick="window.location.href='quizzes.php?category_id=<?php echo $cat['id']; ?>'" class="bg-white rounded-xl shadow-md hover:shadow-2xl transition duration-300 overflow-hidden group cursor-pointer border border-gray-100 transform hover:-translate-y-1">
                 <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-white relative overflow-hidden">
                     <i class="fas fa-code text-5xl absolute -right-4 -bottom-4 opacity-20 transform rotate-12"></i>
                     <i class="fas fa-code text-3xl mb-3 relative z-10"></i>
@@ -55,7 +56,7 @@ $categorys= $monCatigory->getAll();
                 <div class="p-6">
                     <p class="text-gray-600 mb-4 text-sm"><?php echo $cat['description'] ?></p>
                     <div class="flex justify-between items-center text-sm pt-4 border-t border-gray-100">
-                        <span class="text-gray-500"><i class="fas fa-layer-group mr-2"></i>12 Quiz</span>
+                        <span class="text-gray-500"><i class="fas fa-layer-group mr-2"></i><?php echo $cat['quiz_count']; ?></span>
                         <span class="text-blue-600 font-bold group-hover:translate-x-2 transition-transform">Accéder →</span>
                     </div>
                 </div>

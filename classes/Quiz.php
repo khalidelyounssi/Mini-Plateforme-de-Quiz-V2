@@ -130,4 +130,30 @@ class Quiz {
         $result = $this->db->query($sql, [$quizId]);
         return $result->fetch();
     }
+
+     public function getAllCategory($categoryId) {
+        $sql = "SELECT q.*, 
+                       u.nom as enseignant_nom,
+                       COUNT(qu.id) as question_count 
+                FROM quiz q 
+                JOIN users u ON q.enseignant_id = u.id 
+                LEFT JOIN questions qu ON q.id = qu.quiz_id 
+                WHERE q.categorie_id = ? AND q.is_active = 1 
+                GROUP BY q.id 
+                ORDER BY q.created_at DESC";
+        
+        $result = $this->db->query($sql, [$categoryId]);
+        return $result->fetchAll();
+    }
+
+    public function getQuestionCount($quizId) {
+        $sql = "SELECT COUNT(*) as count FROM questions WHERE quiz_id = ?";
+        $result = $this->db->query($sql, [$quizId]);
+        $data = $result->fetch();
+        return (int)$data['count'];
+    }
+
+
+
+    
 }
