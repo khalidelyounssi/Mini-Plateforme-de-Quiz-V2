@@ -1,4 +1,6 @@
 <?php
+
+session_start();
 require_once '../partials/header.php'; 
 require_once '../partials/nav_student.php'; 
 require_once '../../config/database.php';
@@ -37,9 +39,10 @@ $categorys= $monCatigory->getAllC();
         <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
             <h2 class="text-3xl font-bold text-gray-900">Catégories Disponibles</h2>
             
-            <a href="mes_resultats.php" class="inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-orange-500 hover:bg-orange-600 transition duration-300 transform hover:scale-105">
-                <i class="fas fa-chart-line mr-2"></i> Voir mes résultats
-            </a>
+            <a href="my_results.php" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700">
+    <i class="fas fa-chart-line mr-2"></i>
+    Voir mes résultats
+</a>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

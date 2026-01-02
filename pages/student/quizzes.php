@@ -59,12 +59,12 @@ $allQuiz = $monQuiz->getAllCategory($categoryId) ;
         
         <div class="flex items-center text-xs text-gray-500 mb-4">
             <i class="fas fa-question-circle mr-1"></i>
-            <span class="font-semibold mr-1"><?= $quiz['question_count']; ?></span> Questions
+            <span class="font-semibold mr-1"><?php echo $quiz['question_count']; ?></span> Questions
         </div>
         
     </div>
     
-    <a href="quiz_take.php?quiz_id=<?= $quiz['id']; ?>" class="block w-full text-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition mt-4">
+    <a href="quiz_take.php?quiz_id=<?php echo $quiz['id']; ?>" class="block w-full text-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition mt-4">
         Commencer le Quiz
     </a>
     

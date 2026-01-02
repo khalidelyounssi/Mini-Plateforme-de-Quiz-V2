@@ -1,20 +1,18 @@
 <?php
-/**
- * Page: Déconnexion
- * Déconnecte l'utilisateur et redirige vers la page de connexion
- */
+session_start();
 
-require_once '../../config/database.php';
-require_once '../../classes/Database.php';
-require_once '../../classes/Security.php';
-require_once '../../classes/User.php';
+$_SESSION = array();
 
-// Vérifier le token CSRF pour la déconnexion
-if (isset($_GET['token']) && Security::verifyCSRFToken($_GET['token'])) {
-    $user = new User();
-    $user->logout();
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
 }
 
-// Rediriger vers la page de connexion
-header('Location: login.php');
+session_destroy();
+
+header("Location: login.php");
 exit();
+?>

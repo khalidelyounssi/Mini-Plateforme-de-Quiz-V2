@@ -4,6 +4,8 @@
  * Traite le formulaire de connexion
  */
 
+session_start();
+
 require_once '../config/database.php';
 require_once '../classes/Database.php';
 require_once '../classes/Security.php';
@@ -38,6 +40,7 @@ if (!Security::validateEmail($email)) {
     header('Location: ../pages/auth/login.php');
     exit();
 }
+
 
 // Tentative de connexion
 $user = new User();

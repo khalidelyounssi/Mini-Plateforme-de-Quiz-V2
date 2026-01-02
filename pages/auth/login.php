@@ -18,6 +18,8 @@ if (Security::isLoggedIn()) {
     exit();
 }
 
+
+
 // Récupérer les messages d'erreur et de succès
 $error = $_SESSION['login_error'] ?? '';
 $success = $_SESSION['register_success'] ?? '';
