@@ -1,7 +1,7 @@
 <?php
 /**
- * Page: Mes Résultats (Enseignant)
- * Affiche les résultats des quiz pour l'enseignant
+ * Page: Résultats des Étudiants
+ * Affiche les performances des élèves pour l'enseignant connecté
  */
 
 require_once '../../config/database.php';
@@ -9,147 +9,160 @@ require_once '../../classes/Database.php';
 require_once '../../classes/Security.php';
 require_once '../../classes/Result.php';
 
-// Vérifier que l'utilisateur est connecté
 Security::requireLogin();
 
-// Variables pour la navigation
-$currentPage = 'resultats';
-$pageTitle = 'Mes Résultats';
+$currentPage = 'resultats'; 
+$pageTitle = 'Résultats des Étudiants';
+
+$teacherId = $_SESSION['user_id'];
 
 // Récupérer les données
-$userId = $_SESSION['user_id'];
-$userName = $_SESSION['user_nom'];
-
-// Créer l'objet Result
 $resultObj = new Result();
+$studentResults = $resultObj->getStudentResultsByTeacher($teacherId);
 
-// Récupérer MES résultats uniquement
-$mesResultats = $resultObj->getMyResults($userId);
-$mesStats = $resultObj->getMyStats($userId);
+$totalQuizPasses = count($studentResults);
+$totalScore = 0;
+$meilleurScore = 0;
+
+foreach ($studentResults as $res) {
+    $percentage = ($res['total_questions'] > 0) ? ($res['score'] / $res['total_questions']) * 100 : 0;
+    
+    $totalScore += $percentage;
+    
+    if ($percentage > $meilleurScore) {
+        $meilleurScore = $percentage;
+    }
+}
+
+$moyenneGenerale = ($totalQuizPasses > 0) ? $totalScore / $totalQuizPasses : 0;
 ?>
+
 <?php include '../partials/header.php'; ?>
+<?php include '../partials/nav_teacher.php'; ?> 
 
-<?php include '../partials/nav_teacher.php'; ?>
-
-<!-- Main Content -->
-<div class="pt-16">
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <h1 class="text-4xl font-bold mb-4">
-                <i class="fas fa-chart-bar mr-3"></i>Mes Résultats
+<div class="pt-16 bg-gray-50 min-h-screen">
+    
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h1 class="text-3xl font-bold text-gray-900">
+                <i class="fas fa-users-cog mr-3 text-indigo-600"></i>Résultats des Étudiants
             </h1>
-            <p class="text-xl text-indigo-100">Historique de vos scores aux quiz</p>
+            <p class="mt-2 text-gray-600">Suivi des performances de vos élèves sur vos quiz.</p>
         </div>
     </div>
 
-    <!-- Statistiques -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <!-- Total Quiz passés -->
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <div class="flex items-center justify-between">
+            
+            <div class="bg-white rounded-xl shadow p-6 border-l-4 border-blue-500">
+                <div class="flex justify-between items-center">
                     <div>
-                        <p class="text-gray-500 text-sm">Quiz Passés</p>
-                        <p class="text-3xl font-bold text-gray-900"><?= $mesStats['total_quiz'] ?? 0 ?></p>
+                        <p class="text-gray-500 text-sm font-medium uppercase">Participations</p>
+                        <p class="text-3xl font-bold text-gray-900"><?= $totalQuizPasses ?></p>
                     </div>
-                    <div class="bg-blue-100 p-3 rounded-lg">
-                        <i class="fas fa-clipboard-check text-blue-600 text-2xl"></i>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-user-graduate text-blue-600 text-xl"></i>
                     </div>
                 </div>
             </div>
             
-            <!-- Moyenne -->
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <div class="flex items-center justify-between">
+            <div class="bg-white rounded-xl shadow p-6 border-l-4 border-green-500">
+                <div class="flex justify-between items-center">
                     <div>
-                        <p class="text-gray-500 text-sm">Moyenne</p>
-                        <p class="text-3xl font-bold text-gray-900">
-                            <?= $mesStats['moyenne'] ? round($mesStats['moyenne'], 1) . '%' : '-' ?>
-                        </p>
+                        <p class="text-gray-500 text-sm font-medium uppercase">Moyenne Classe</p>
+                        <p class="text-3xl font-bold text-gray-900"><?= round($moyenneGenerale, 1) ?>%</p>
                     </div>
-                    <div class="bg-green-100 p-3 rounded-lg">
-                        <i class="fas fa-chart-line text-green-600 text-2xl"></i>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-chart-line text-green-600 text-xl"></i>
                     </div>
                 </div>
             </div>
             
-            <!-- Meilleur Score -->
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <div class="flex items-center justify-between">
+            <div class="bg-white rounded-xl shadow p-6 border-l-4 border-yellow-500">
+                <div class="flex justify-between items-center">
                     <div>
-                        <p class="text-gray-500 text-sm">Meilleur Score</p>
-                        <p class="text-3xl font-bold text-gray-900">
-                            <?= $mesStats['meilleur_score'] ? round($mesStats['meilleur_score'], 1) . '%' : '-' ?>
-                        </p>
+                        <p class="text-gray-500 text-sm font-medium uppercase">Meilleur Score</p>
+                        <p class="text-3xl font-bold text-gray-900"><?= round($meilleurScore, 1) ?>%</p>
                     </div>
-                    <div class="bg-yellow-100 p-3 rounded-lg">
-                        <i class="fas fa-trophy text-yellow-600 text-2xl"></i>
+                    <div class="bg-yellow-100 p-3 rounded-full">
+                        <i class="fas fa-crown text-yellow-600 text-xl"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Historique -->
-        <div class="bg-white rounded-xl shadow-md overflow-hidden">
-            <div class="p-6 border-b border-gray-200">
-                <h2 class="text-2xl font-bold text-gray-900">
-                    <i class="fas fa-history mr-2 text-indigo-600"></i>Historique
-                </h2>
+        <div class="bg-white rounded-xl shadow overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">Détails par étudiant</h3>
+                <span class="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">
+                    <?= count($studentResults) ?> enregistrements
+                </span>
             </div>
-            
-            <?php if (empty($mesResultats)): ?>
-                <div class="p-8 text-center">
-                    <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Aucun résultat</h3>
-                    <p class="text-gray-600">Vous n'avez pas encore passé de quiz.</p>
+
+            <?php if (empty($studentResults)): ?>
+                <div class="p-12 text-center text-gray-500">
+                    <i class="fas fa-folder-open text-5xl mb-4 text-gray-300"></i>
+                    <p>Aucun étudiant n'a encore passé vos quiz.</p>
                 </div>
             <?php else: ?>
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                    <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quiz</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Catégorie</th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Score</th>
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Pourcentage</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Étudiant</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quiz</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            <?php foreach ($mesResultats as $resultat): ?>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <?php foreach ($studentResults as $res): ?>
                                 <?php 
-                                $pourcentage = ($resultat['score'] / $resultat['total_questions']) * 100;
-                                if ($pourcentage >= 80) {
-                                    $colorClass = 'bg-green-100 text-green-800';
-                                } elseif ($pourcentage >= 60) {
-                                    $colorClass = 'bg-yellow-100 text-yellow-800';
-                                } else {
-                                    $colorClass = 'bg-red-100 text-red-800';
-                                }
+                                    // Calculs
+                                    $score = $res['score'];
+                                    $total = $res['total_questions'];
+                                    $percent = ($total > 0) ? round(($score / $total) * 100) : 0;
+                                    
+                                    // Status Style
+                                    if ($percent >= 80) $badge = "bg-green-100 text-green-800";
+                                    elseif ($percent >= 50) $badge = "bg-yellow-100 text-yellow-800";
+                                    else $badge = "bg-red-100 text-red-800";
                                 ?>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4">
-                                        <div class="font-medium text-gray-900">
-                                            <?= htmlspecialchars($resultat['quiz_titre']) ?>
+                                <tr class="hover:bg-gray-50 transition">
+                                    
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-8 w-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs">
+                                                <?= strtoupper(substr($res['etudiant_nom'], 0, 2)) ?>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($res['etudiant_nom']) ?></div>
+                                                <div class="text-sm text-gray-500"><?= htmlspecialchars($res['etudiant_email']) ?></div>
+                                            </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded-full">
-                                            <?= htmlspecialchars($resultat['categorie_nom'] ?? 'N/A') ?>
+
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900 font-medium"><?= htmlspecialchars($res['quiz_titre']) ?></div>
+                                    </td>
+
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <div class="text-sm font-bold text-gray-900"><?= $score ?> / <?= $total ?></div>
+                                        <div class="text-xs text-gray-500"><?= $percent ?>%</div>
+                                    </td>
+
+                                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?= $badge ?>">
+                                            <?= ($percent >= 50) ? 'Réussi' : 'Échoué' ?>
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-center font-bold">
-                                        <?= $resultat['score'] ?>/<?= $resultat['total_questions'] ?>
+
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
+                                        <?= date('d/m/Y', strtotime($res['created_at'])) ?>
+                                        <span class="block text-xs"><?= date('H:i', strtotime($res['created_at'])) ?></span>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <span class="px-3 py-1 <?= $colorClass ?> text-sm font-semibold rounded-full">
-                                            <?= round($pourcentage, 1) ?>%
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-gray-500 text-sm">
-                                        <?= date('d/m/Y H:i', strtotime($resultat['created_at'])) ?>
-                                    </td>
+
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -161,4 +174,3 @@ $mesStats = $resultObj->getMyStats($userId);
 </div>
 
 <?php include '../partials/footer.php'; ?>
-

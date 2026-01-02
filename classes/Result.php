@@ -82,4 +82,38 @@ class Result {
         $result = $this->db->query($sql, [$etudiantId]);
         return $result->fetch();
     }
+
+    public function getStudentResultsByTeacher($teacherId) {
+        $db = Database::getInstance();
+        $conn = $db->getConnection();
+
+        $sql = "SELECT 
+                    r.*, 
+                    q.titre as quiz_titre, 
+                    u.nom as etudiant_nom,
+                    u.email as etudiant_email
+                FROM results r
+                JOIN quiz q ON r.quiz_id = q.id
+                JOIN users u ON r.etudiant_id = u.id
+                WHERE q.enseignant_id = ?
+                ORDER BY r.created_at DESC";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$teacherId]);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function checkAttempt($studentId, $quizId) {
+        $db = Database::getInstance();
+        $conn = $db->getConnection();
+        
+        $sql = "SELECT id FROM results WHERE etudiant_id = ? AND quiz_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$studentId, $quizId]);
+        
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return $result; 
+    }
 }

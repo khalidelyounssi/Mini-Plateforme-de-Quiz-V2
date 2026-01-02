@@ -1,16 +1,15 @@
 <?php
-
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
+header('Content-Type: application/json');
 
 require_once '../../config/database.php';
 require_once '../../classes/Database.php';
 require_once '../../classes/Quiz.php';
 require_once '../../classes/Question.php';
-
-header('Content-Type: application/json');
+require_once '../../classes/Result.php';
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -45,7 +44,20 @@ try {
             $quizId = $input['quiz_id'] ?? ($_POST['quiz_id'] ?? 0);
             $userAnswers = $input['answers'] ?? (json_decode($_POST['answers'] ?? '[]', true));
             
-            $userId = $_SESSION['user_id'] ?? 1; 
+            if (!isset($_SESSION['user_id'])) {
+                echo json_encode(['success' => false, 'message' => 'Session expirée, veuillez vous reconnecter.']);
+                exit;
+            }
+            $userId = $_SESSION['user_id'];
+
+            $resObj = new Result();
+            if ($resObj->checkAttempt($userId, $quizId)) {
+                echo json_encode([
+                    'success' => false, 
+                    'message' => 'Tentative rejetée : Vous avez déjà passé ce quiz !'
+                ]);
+                exit;
+            }
 
             $qObj = new Question();
             $allQuestions = $qObj->getAllByQuiz($quizId);
@@ -61,7 +73,6 @@ try {
             $answersJson = json_encode($userAnswers);
 
             $db = Database::getInstance();
-            
             $sql = "INSERT INTO results (quiz_id, etudiant_id, score, total_questions, user_answers_json, created_at) 
                     VALUES (?, ?, ?, ?, ?, NOW())";
             
@@ -72,7 +83,7 @@ try {
             echo json_encode([
                 'success' => true, 
                 'score' => $score,
-                'result_id' => $lastResultId 
+                'result_id' => $lastResultId
             ]);
             exit;
         }
