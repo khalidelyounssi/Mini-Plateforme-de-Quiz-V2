@@ -94,11 +94,7 @@ $quizInfo = $quizObj->getById($quizId);
             <?php endforeach; ?>
         </div>
         
-        <div class="mt-8 text-center">
-            <a href="quiz_take.php?quiz_id=<?php echo $quizId; ?>" class="px-6 py-3 bg-gray-800 text-white rounded hover:bg-gray-900 transition">
-                Refaire le Quiz
-            </a>
-        </div>
+        
 
     </div>
 </div>
